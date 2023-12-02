@@ -1,0 +1,238 @@
+#pragma once
+#include <iostream>
+#include <fstream>
+using namespace std;
+// Тут основа, оголошую все найголовніше
+const int MAX_SONGS = 200;
+const int MAX_NAME_LENGTH = 100;
+const int MAX_AUTHOR_LENGTH = 100;
+const int MAX_YEAR_LENGTH = 100;
+const int MAX_TEXT_LENGTH = 1000;
+
+struct Song
+{
+	char name[MAX_NAME_LENGTH];
+	char author[MAX_AUTHOR_LENGTH];
+	char year[MAX_YEAR_LENGTH];
+	char text[MAX_TEXT_LENGTH];
+};
+
+
+#pragma once
+void addSong(Song* songs, int& count_song) {
+	if (count_song < MAX_SONGS)
+	{
+		cout << "Enter name song: ";
+		cin.ignore();
+		cin.getline(songs[count_song].name, MAX_NAME_LENGTH);
+
+		cout << "Enter author song: ";
+		cin.getline(songs[count_song].author, MAX_AUTHOR_LENGTH);
+
+		cout << "Enter year song: ";
+		cin.getline(songs[count_song].year, MAX_YEAR_LENGTH);
+
+		cout << "Enter text for song: ";
+		cin.getline(songs[count_song].text, MAX_TEXT_LENGTH);
+
+		++count_song;
+	}
+	else cout << "You have more song! " << count_song << "/" << MAX_SONGS;
+}
+
+void DisplaySong(Song* songs, int count_song) {
+	for (size_t i = 0; i < count_song; i++)
+	{
+		cout << "\nSong #" << (i + 1) << ":\n";
+		cout << "Title: " << songs[i].name << "\n";
+		cout << "Author: " << songs[i].author << "\n";
+		cout << "Year: " << songs[i].year << "\n";
+		cout << "Text: " << songs[i].text << "\n";
+	}
+}
+
+void RevomeSong(Song* songs, int& count_song, const char* Title_DELETE) {
+	for (size_t i = 0; i < count_song; i++)
+	{
+		// Тут якщо умова виконується, це означає, що пісню знайдено.
+		if (strcmp(songs[i].name, Title_DELETE) == 0)
+		{
+			count_song--;
+			swap(songs[i], songs[count_song]); //замінює поточну пісню останньою піснею в масиві.
+			cout << "Song deleted!\n";
+			return;
+		}
+		else cout << "Not found Song!";
+	}
+}
+
+void ChangeText(Song* songs, int count_song, const char* Name_Change) {
+	for (size_t i = 0; i < count_song; i++)
+	{
+		if (strcmp(songs[i].name, Name_Change) == 0) //  ця умова перевіряє, чи назва поточної пісні дорівнює рядку 
+		{
+
+			cout << "Enter new text in song: \n";
+			cin.getline(songs[i].text, MAX_TEXT_LENGTH);
+			return;
+		}
+	}
+}
+
+void SearchAuthor(Song* songs, int count_song, const char* search_author) {
+	bool found = false; // це для відстеження того, чи знайдено пісні вказаного автора
+	for (size_t i = 0; i < count_song; i++)
+	{
+		if (strcmp(songs[i].author, search_author) == 0)
+		{
+			if (!found) // Перевіряє, чи found є фолсе. якщо так, - це означає, що це перша пісня
+			{
+				cout << "Song: " << search_author << ":\n";
+				found = true;
+			}
+			cout << "Title: " << songs[i].name << "\n";
+			cout << "Author: " << songs[i].author << "\n";
+			cout << "Year: " << songs[i].year << "\n";
+			cout << "Text: " << songs[i].text << "\n";
+		}
+	}
+}
+
+void SearchText(Song* songs, int count_song, const char* search_text) {
+	bool found = false;
+	for (size_t i = 0; i < count_song; i++)
+	{
+		if (strstr(songs[i].text, search_text) != nullptr) // Перевіряє, чи містить текст поточної пісні підрядок за допомогою strstr
+		{
+			if (!found)
+			{
+				cout << "Text: " << search_text << ":\n";
+				found = true;
+			}
+			cout << "Title: " << songs[i].name << "\n";
+			cout << "Author: " << songs[i].author << "\n";
+			cout << "Year: " << songs[i].year << "\n";
+			cout << "Text: " << songs[i].text << "\n";
+		}
+	}
+}
+
+
+#pragma once
+void SaveFileSong(Song* songs, int& count_song, const char* NAME_FILE) {
+	ofstream fout(NAME_FILE);
+
+	if (fout.is_open())
+	{
+		for (size_t i = 0; i < count_song; i++)
+		{
+			fout << "Title: " << songs[i].name << endl;
+			fout << "Author: " << songs[i].author << endl;
+			fout << "Year: " << songs[i].year << endl;
+			fout << "Text: " << songs[i].text << endl;
+		}
+		cout << "Successfully!\n";
+		fout.close();
+	}
+	else
+	{
+		cerr << "Error";
+	}
+}
+
+void LoadFileSong(Song* songs, int& count_song, const char* NAME_FILE) {
+	ifstream fin(NAME_FILE);
+	if (fin.is_open())
+	{
+		while (count_song < MAX_SONGS && fin.getline(songs[count_song].name, MAX_NAME_LENGTH))
+			/*вводить цикл для читання рядків із файлу, цикл продовжується, доки у файлі є більше рядків
+			і кожен виклик fin.getlineбуде успішним. */
+		{
+			fin.getline(songs[count_song].name, MAX_NAME_LENGTH);
+			fin.getline(songs[count_song].author, MAX_AUTHOR_LENGTH);
+			fin.getline(songs[count_song].year, MAX_YEAR_LENGTH);
+			fin.getline(songs[count_song].text, MAX_TEXT_LENGTH);
+			++count_song;
+		}
+		cout << "Successfully!\n";
+		fin.close();
+	}
+	else {
+		cerr << "Error!";
+	}
+}
+
+
+#include "Basic.h"
+#include "WorkwithFile.h"
+#include "WorkwithSong.h"
+using namespace std;
+int main() {
+	Song songs[MAX_SONGS];
+	int choice;
+	int count_song = 0;
+	char filename[100];
+	char NAME[100];
+	char AUTHOR[100];
+	char TEXT[1000];
+	// Тут в нас менюха
+	do {
+		cout << "\tYour menu:\n";
+		cout << "\t1. Add a song\n";
+		cout << "\t2. Display all songs\n";
+		cout << "\t3. Delete a song\n";
+		cout << "\t4. Modify a song\n";
+		cout << "\t5. Save songs to file\n";
+		cout << "\t6. Load songs from file\n";
+		cout << "\t7. Search songs by author\n";
+		cout << "\t8. Search songs by word\n";
+		cout << "\t9. Exit\n";
+		cout << "\n\n\tEnter your choice: ";
+		cin >> choice;
+		switch (choice) {
+		case 1:
+			addSong(songs, count_song);
+			break;
+		case 2:
+			DisplaySong(songs, count_song);
+			break;
+		case 3:
+			cout << "Enter the title of the song to delete: ";
+			cin.ignore();
+			cin.getline(NAME, MAX_NAME_LENGTH);
+			RevomeSong(songs, count_song, NAME);
+			break;
+		case 4:
+			cout << "Enter the title of the song to modify: ";
+			cin.ignore();
+			cin.getline(NAME, MAX_NAME_LENGTH);
+			ChangeText(songs, count_song, NAME);
+			break;
+		case 5:
+			cout << "Enter name file to save: ";
+			cin >> filename;
+			SaveFileSong(songs, count_song, filename);
+			break;
+		case 6:
+			cout << "Enter name file to load: ";
+			cin >> filename;
+			LoadFileSong(songs, count_song, filename);
+			break;
+		case 7:
+			cout << "Enter the author of the song to find him: ";
+			cin.ignore();
+			cin.getline(AUTHOR, MAX_AUTHOR_LENGTH);
+			SearchAuthor(songs, count_song, AUTHOR);
+			break;
+		case 8:
+			cout << "Enter the TEXT of the song to find it: ";
+			cin.ignore();
+			cin.getline(TEXT, MAX_TEXT_LENGTH);
+			SearchText(songs, count_song, TEXT);
+			break;
+		case 9:
+			cout << "Exit!";
+			break;
+		}
+	} while (choice != 9);
+}
